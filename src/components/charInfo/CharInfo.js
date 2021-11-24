@@ -38,6 +38,7 @@ class CharInfo extends Component {
             .then(this.onCharLoaded)
             .catch(this.onError)
     }
+    
 
     onCharLoaded = (char) => {
         this.setState({ char, loading: false })
