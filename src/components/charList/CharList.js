@@ -49,6 +49,7 @@ class CharList extends Component {
                     src={thumbnail}
                     name={name}
                     key={id}
+                    onCharSelected={() => {this.props.onCharSelected(id)}}
                 />
             );
         });
@@ -72,13 +73,13 @@ class CharList extends Component {
     }
 }
 
-const ListChars = ({ src, name }) => {
+const ListChars = ({ src, name, onCharSelected }) => {
     let style = { objectFit: 'cover' };
     if (src.includes('image_not_available')) {
         style = { objectFit: 'fill' }
     }
     return (
-        <li className="char__item">
+        <li className="char__item" onClick={onCharSelected}>
             <img src={src} alt={name} style={style} />
             <div className="char__name">{name}</div>
         </li>
