@@ -42,6 +42,7 @@ class MarvelService {
         } 
         return {
             name: char.name,
+            id: char.id,
             description: descriptionChar,
             // thumbnail - маленькая картинка, превьюха
             thumbnail: char.thumbnail.path + '.' + char.thumbnail.extension,
