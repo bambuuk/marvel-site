@@ -50,14 +50,28 @@ class CharList extends Component {
             ended = true;
         }
 
-        this.setState(({chars, offset}) => ({
-                // здесь мы объеденили массив текущих данных со стейта с новыми данными от запроса на сервер
-                chars: [...chars, ...newChars], 
-                loading: false,
-                newItemLoading: false,
-                offset: offset + 9,
-                charEnded: ended
+        this.setState(({ chars, offset }) => ({
+            // здесь мы объеденили массив текущих данных со стейта с новыми данными от запроса на сервер
+            chars: [...chars, ...newChars],
+            loading: false,
+            newItemLoading: false,
+            offset: offset + 9,
+            charEnded: ended
         }))
+    }
+
+    toogleActiveChar = (id, e) => {
+        const charList = document.querySelectorAll('.char__item');
+        charList.forEach(item => {
+            item.classList.remove('char__item_selected');
+        })
+        if (e.key !== 'Enter') {
+            e.target.parentElement.focus();
+            e.target.parentElement.classList.add('char__item_selected');
+        } else {
+            e.target.focus();
+            e.target.classList.add('char__item_selected');
+        }
     }
 
     render() {
@@ -70,7 +84,9 @@ class CharList extends Component {
                     src={thumbnail}
                     name={name}
                     key={id}
-                    onCharSelected={() => {this.props.onCharSelected(id)}}
+                    onCharSelected={() => { this.props.onCharSelected(id) }}
+                    toogleActiveChar={(e) => { this.toogleActiveChar(id, e) }}
+
                 />
             );
         });
@@ -85,11 +101,11 @@ class CharList extends Component {
                     <ul className="char__grid">
                         {elem}
                     </ul>
-                    <button 
-                    className="button button__main button__long"
-                    disabled={newItemLoading}
-                    style={{'display': charEnded ? 'none' : 'block'}}
-                    onClick={() => this.onRequest(offset)}>
+                    <button
+                        className="button button__main button__long"
+                        disabled={newItemLoading}
+                        style={{ 'display': charEnded ? 'none' : 'block' }}
+                        onClick={() => this.onRequest(offset)}>
                         <div className="inner">load more</div>
                     </button>
                 </div>
@@ -98,17 +114,32 @@ class CharList extends Component {
     }
 }
 
-const ListChars = ({ src, name, onCharSelected }) => {
-    let style = { objectFit: 'cover' };
-    if (src.includes('image_not_available')) {
-        style = { objectFit: 'fill' }
+class ListChars extends Component {
+
+    render() {
+        const { src, name, onCharSelected, toogleActiveChar } = this.props;
+        let style = { objectFit: 'cover' };
+        if (src.includes('image_not_available')) {
+            style = { objectFit: 'fill' }
+        }
+        return (
+            <li
+                tabIndex={0}
+                className="char__item"
+                onClick={(e) => { onCharSelected(e); toogleActiveChar(e) }}
+                onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                        onCharSelected(e);
+                        toogleActiveChar(e);
+                    };
+
+                }}
+            >
+                <img src={src} alt={name} style={style} />
+                <div className="char__name">{name}</div>
+            </li>
+        )
     }
-    return (
-        <li className="char__item" onClick={onCharSelected}>
-            <img src={src} alt={name} style={style} />
-            <div className="char__name">{name}</div>
-        </li>
-    )
 }
 
 CharList.propTypes = {
