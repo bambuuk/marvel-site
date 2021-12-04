@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './charList.scss';
 
@@ -6,140 +6,126 @@ import MarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 
-class CharList extends Component {
+const CharList = (props) => {
 
-    state = {
-        chars: [],
-        loading: true,
-        error: false,
-        newItemLoading: false, // необходим для блокироки кнопки добавления новых персонажей
-        offset: 210,
-        charEnded: false
+    const [chars, setChars] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [newItemLoading, setNewItemLoading] = useState(false);
+    const [offset, setOffset] = useState(210);
+    const [charEnded, setCharEnded] = useState(false);
+
+    const marvelService = new MarvelService();
+
+    useEffect(() => {
+        onRequest();
+    }, []);
+
+    const onError = () => {
+        setError(true);
+        setLoading(false);
     }
 
-    marvelService = new MarvelService();
-
-    componentDidMount() {
-        this.onRequest();
-    }
-
-    onError = () => {
-        this.setState({
-            loading: false,
-            error: true
-        })
-    }
-
-    onRequest = (offset) => {
-        this.onCharListLoading();
-        this.marvelService
+    const onRequest = (offset) => {
+        onCharListLoading();
+        marvelService
             .getAllCharacters(offset)
-            .then(this.onCharListLoaded)
-            .catch(this.onError)
+            .then(onCharListLoaded)
+            .catch(onError)
     }
 
-    onCharListLoading = () => {
-        this.setState({
-            newItemLoading: true
-        })
+    const onCharListLoading = () => {
+        setNewItemLoading(true);
     }
 
-    onCharListLoaded = (newChars) => {
+    const onCharListLoaded = (newChars) => {
         let ended = false;
         if (newChars.length < 9) {
             ended = true;
         }
 
-        this.setState(({ chars, offset }) => ({
-            // здесь мы объеденили массив текущих данных со стейта с новыми данными от запроса на сервер
-            chars: [...chars, ...newChars],
-            loading: false,
-            newItemLoading: false,
-            offset: offset + 9,
-            charEnded: ended
-        }))
+        // this.setState(({ chars, offset }) => ({
+        //     // здесь мы объеденили массив текущих данных со стейта с новыми данными от запроса на сервер
+        //     chars: [...chars, ...newChars],
+        //     loading: false,
+        //     newItemLoading: false,
+        //     offset: offset + 9,
+        //     charEnded: ended
+        // })) 
+        setChars(chars => [...chars, ...newChars]);
+        setLoading(loading => false);
+        setNewItemLoading(newItemLoading => false);
+        setOffset(offset => offset + 9)
+        setCharEnded(charEnded => ended)
+
     }
 
-    toogleActiveChar = (id, e) => {
-        const charList = document.querySelectorAll('.char__item');
-        charList.forEach(item => {
-            item.classList.remove('char__item_selected');
-        })
-        if (e.key !== 'Enter') {
-            e.target.parentElement.focus();
-            e.target.parentElement.classList.add('char__item_selected');
-        } else {
-            e.target.focus();
-            e.target.classList.add('char__item_selected');
-        }
+    const itemRefs = useRef([]);
+
+    const focusOnItem = (id) => {
+        itemRefs.current.forEach(item => item.classList.remove('char__item_selected'));
+        itemRefs.current[id].classList.add('char__item_selected');
+        itemRefs.current[id].focus();
     }
 
-    render() {
-        const { chars, loading, error, offset, newItemLoading, charEnded } = this.state;
-        const elem = chars.map(item => {
-            const { thumbnail, name, id } = item;
+    // Этот метод создан для оптимизации, 
+    // чтобы не помещать такую конструкцию в метод render
+    function renderItems(arr) {
+        const items = arr.map((item, i) => {
+            let imgStyle = { 'objectFit': 'cover' };
+            if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
+                imgStyle = { 'objectFit': 'unset' };
+            }
 
             return (
-                <ListChars
-                    src={thumbnail}
-                    name={name}
-                    key={id}
-                    onCharSelected={() => { this.props.onCharSelected(id) }}
-                    toogleActiveChar={(e) => { this.toogleActiveChar(id, e) }}
-
-                />
-            );
-        });
-
-        if (loading) {
-            return <Spinner />
-        } else if (error) {
-            return <ErrorMessage />
-        } else {
-            return (
-                <div className="char__list">
-                    <ul className="char__grid">
-                        {elem}
-                    </ul>
-                    <button
-                        className="button button__main button__long"
-                        disabled={newItemLoading}
-                        style={{ 'display': charEnded ? 'none' : 'block' }}
-                        onClick={() => this.onRequest(offset)}>
-                        <div className="inner">load more</div>
-                    </button>
-                </div>
+                <li
+                    className="char__item"
+                    tabIndex={0}
+                    ref={el => itemRefs.current[i] = el}
+                    key={item.id}
+                    onClick={() => {
+                        props.onCharSelected(item.id);
+                        focusOnItem(i);
+                    }}
+                    onKeyPress={(e) => {
+                        if (e.key === ' ' || e.key === "Enter") {
+                            props.onCharSelected(item.id);
+                            focusOnItem(i);
+                        }
+                    }}>
+                    <img src={item.thumbnail} alt={item.name} style={imgStyle} />
+                    <div className="char__name">{item.name}</div>
+                </li>
             )
-        }
-    }
-}
-
-class ListChars extends Component {
-
-    render() {
-        const { src, name, onCharSelected, toogleActiveChar } = this.props;
-        let style = { objectFit: 'cover' };
-        if (src.includes('image_not_available')) {
-            style = { objectFit: 'fill' }
-        }
+        });
+        // А эта конструкция вынесена для центровки спиннера/ошибки
         return (
-            <li
-                tabIndex={0}
-                className="char__item"
-                onClick={(e) => { onCharSelected(e); toogleActiveChar(e) }}
-                onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                        onCharSelected(e);
-                        toogleActiveChar(e);
-                    };
-
-                }}
-            >
-                <img src={src} alt={name} style={style} />
-                <div className="char__name">{name}</div>
-            </li>
+            <ul className="char__grid">
+                {items}
+            </ul>
         )
     }
+
+    const items = renderItems(chars);
+
+    const errorMessage = error ? <ErrorMessage /> : null;
+    const spinner = loading ? <Spinner /> : null;
+    const content = !(loading || error) ? items : null;
+
+    return (
+        <div className="char__list">
+            {errorMessage}
+            {spinner}
+            {content}
+            <button
+                className="button button__main button__long"
+                disabled={newItemLoading}
+                style={{ 'display': charEnded ? 'none' : 'block' }}
+                onClick={() => onRequest(offset)}>
+                <div className="inner">load more</div>
+            </button>
+        </div>
+    )
 }
 
 CharList.propTypes = {
