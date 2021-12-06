@@ -1,36 +1,29 @@
+import {useHttp} from '../hooks/http.hook';
+
 // Создаём обычный джаваскриптовый класс, поэтому не наследуем и не импортируем компоненты
-class MarvelService {
-    _apiBase = 'https://gateway.marvel.com:443/v1/public/';
-    _apiKey = 'apikey=0f63933eef0210b8256f2966cbc48725';
-    _baseOffset = 210;
+const useMarvelService = () => {
+    const {loading, request, error, clearError} = useHttp();
 
-    getResource = async (url) => {
+    const _apiBase = 'https://gateway.marvel.com:443/v1/public/';
+    const _apiKey = 'apikey=0f63933eef0210b8256f2966cbc48725';
+    const _baseOffset = 210;
 
-        // В переменной res мы получаем промис
-        let res = await fetch(url);
 
-        /** Здесь мы создаём ошибку если статус запроса неудачный */
-        if (!res.ok) {
-            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
-        }
-
-        return await res.json(); // возвращаем промис в формате json
-    }
 
     // метод получения данных всех персонажей
-    getAllCharacters = async (offset = this._baseOffset) => {
-        const res = await this.getResource(`${this._apiBase}characters?limit=9&offset=${offset}&${this._apiKey}`);
-        return res.data.results.map(this._transformCharacter);
+    const getAllCharacters = async (offset = _baseOffset) => {
+        const res = await request(`${_apiBase}characters?limit=9&offset=${offset}&${_apiKey}`);
+        return res.data.results.map(_transformCharacter);
     }
     
     // метод получения данных одного персонажа
-    getCharacter = async (id) => {
-        const res = await this.getResource(`${this._apiBase}characters/${id}?${this._apiKey}`);
-        return this._transformCharacter(res.data.results[0]); // в _transformCharacter передаём конкретный объект (персонаж)
+    const getCharacter = async (id) => {
+        const res = await request(`${_apiBase}characters/${id}?${_apiKey}`);
+        return _transformCharacter(res.data.results[0]); // в _transformCharacter передаём конкретный объект (персонаж)
     }
 
     // метод формирования объекта с нужными нам данными персонажа, вытягиваем с ответа по гет запросу что нам нужно
-    _transformCharacter = (char) => {
+    const _transformCharacter = (char) => {
         let descriptionChar = '';
         if (char.description) {
             if (char.description.length > 190) {
@@ -52,6 +45,8 @@ class MarvelService {
             comics: char.comics.items
         }
     }
+
+    return {loading, error, getAllCharacters, getCharacter, clearError}
 }
 
-export default MarvelService;
+export default useMarvelService;
