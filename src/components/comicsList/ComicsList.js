@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+import { Link } from 'react-router-dom';
 
 import './comicsList.scss';
 import useMarvelService from '../../services/MarvelService';
@@ -29,7 +30,7 @@ const ComicsList = () => {
         if (newComicses.length < 8) {
             ended = true;
         }
-
+        
         setComicses(comicses => [...comicses, ...newComicses]);
         setNewItemLoading(newItemLoading => false);
         setOffset(offset => offset + 8)
@@ -38,14 +39,14 @@ const ComicsList = () => {
 
     function renderItem(arr) {
         const items = arr.map((item, i) => {
-            const {url, thumbnail, name, price} = item;
+            const {thumbnail, name, price, id} = item;
             return (
                 <li className="comics__item" key={i} tabIndex={0}>
-                    <a href={url}>
+                    <Link to={`/comics/${id}`}>
                         <img src={thumbnail} alt={name} className="comics__item-img"/>
                         <div className="comics__item-name">{name}</div>
-                        <div className="comics__item-price">{price}</div>
-                    </a>
+                        <div className="comics__item-price">{price}$</div>
+                    </Link>
                 </li>
             )
         });

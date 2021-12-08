@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
  * wabpack ищет файлик index.js с которого и подтягивает
  * нужные компоненты 
  */
-import {MainPage, ComicsPage} from '../pages';
+import {MainPage, ComicsPage, Page404, SingleComicPage} from '../pages';
 import AppHeader from "../appHeader/AppHeader";
 
 const App = () => {
@@ -20,6 +20,12 @@ const App = () => {
                         </Route>
                         <Route exact path="/comics">
                             <ComicsPage/>
+                        </Route>
+                        <Route exact path="/comics/:comicId">
+                            <SingleComicPage/>
+                        </Route>
+                        <Route path="*">
+                            <Page404/>
                         </Route>
                     </Switch>
                 </main>
