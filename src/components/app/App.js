@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 /** Когда мы указываем в пути только папку, без файла, 
  * wabpack ищет файлик index.js с которого и подтягивает
@@ -21,20 +21,12 @@ const App = () => {
                 <AppHeader />
                 <main>
                     <Suspense fallback={<Spinner/>}>
-                        <Switch>
-                            <Route exact path="/">
-                                <MainPage />
-                            </Route>
-                            <Route exact path="/comics">
-                                <ComicsPage />
-                            </Route>
-                            <Route exact path="/comics/:comicId">
-                                <SingleComicPage />
-                            </Route>
-                            <Route path="*">
-                                <Page404 />
-                            </Route>
-                        </Switch>
+                        <Routes>
+                            <Route path="/" element={<MainPage />}/>
+                            <Route path="/comics" element={<ComicsPage />}/>
+                            <Route path="/comics/:comicId" element={<SingleComicPage />} />
+                            <Route path="*" element={<Page404 />}/>
+                        </Routes>
                     </Suspense>
                 </main>
             </div>
