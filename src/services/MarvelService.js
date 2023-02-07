@@ -2,7 +2,7 @@ import {useHttp} from '../hooks/http.hook';
 
 // Создаём обычный джаваскриптовый класс, поэтому не наследуем и не импортируем компоненты
 const useMarvelService = () => {
-    const {loading, request, error, clearError} = useHttp();
+    const { request, clearError, process, setProcess} = useHttp();
 
     const _apiBase = 'https://gateway.marvel.com:443/v1/public/';
     const _apiKey = 'apikey=0f63933eef0210b8256f2966cbc48725';
@@ -71,7 +71,15 @@ const useMarvelService = () => {
         }
     }
 
-    return {loading, error, getAllCharacters, getCharacter, getAllComicses, clearError, getComics}
+    return {
+        process,
+        setProcess, 
+        clearError, 
+        getAllCharacters, 
+        getCharacter, 
+        getAllComicses, 
+        getComics
+    }
 }
 
 export default useMarvelService;
