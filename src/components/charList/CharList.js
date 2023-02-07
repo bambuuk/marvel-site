@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import './charList.scss';
 
@@ -32,6 +32,7 @@ const CharList = (props) => {
 
     useEffect(() => {
         onRequest(offset, true);
+        // eslint-disable-next-line
     }, []);
 
     const onRequest = (offset, initial) => {
@@ -64,6 +65,7 @@ const CharList = (props) => {
     // Этот метод создан для оптимизации, 
     // чтобы не помещать такую конструкцию в метод render
     function renderItems(arr) {
+        console.log('goooo')
         const items = arr.map((item, i) => {
             let imgStyle = { 'objectFit': 'cover' };
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
@@ -99,9 +101,14 @@ const CharList = (props) => {
         )
     }
 
+    const elements = useMemo(() => {
+        return setContent(process, () => renderItems(chars), newItemLoading);
+        // eslint-disable-next-line
+    }, [process]);
+
     return (
         <div className="char__list">
-            {setContent(process, () => renderItems(chars), newItemLoading)}
+            {elements}
             <button
                 className="button button__main button__long"
                 disabled={newItemLoading}
