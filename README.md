@@ -1,3 +1,12 @@
+This is React app multi-page site which made with functional components. 
+
+Features :
+
+- Fully dynamically rendered elements using REST API 
+- Data pagination 
+- Filters
+- Routing
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

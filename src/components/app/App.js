@@ -1,10 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-/** Когда мы указываем в пути только папку, без файла, 
- * wabpack ищет файлик index.js с которого и подтягивает
- * нужные компоненты 
- */
 import Spinner from '../spinner/Spinner';
 import AppHeader from "../appHeader/AppHeader";
 
@@ -16,7 +12,7 @@ const SingleComicPage = lazy(() => import('../pages/SingleComicPage.js'));
 const App = () => {
 
     return (
-        <Router>
+        <Router basename='/marvel-site'>
             <div className="app">
                 <AppHeader />
                 <main>
